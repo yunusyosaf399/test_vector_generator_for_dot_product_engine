@@ -65,13 +65,13 @@ end
 Compare y_out from simulation with the value in expected_y.txt.
 📌 Requirements
 
-    Python 3.6+
+Python 3.6+
 
-    Packages:
+Packages:
 
-        numpy
+    numpy
 
 Install with:
 
-<pre> ```bash pip install numpy ``` </pre>
+    pip install numpy
 
