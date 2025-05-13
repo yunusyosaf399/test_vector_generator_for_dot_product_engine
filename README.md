@@ -23,12 +23,12 @@ You can select one of the following types:
 
 When you run the script and choose a type, it generates:
 
-test_vectors_by_type/
-├── int4/
-│ ├── A_row_packed.mem # Input vector A
-│ ├── x_vector.mem # Input vector x
-│ └── expected_y.txt # Output dot product (float)
-├── ...
+    test_vectors_by_type/
+    ├── int4/
+    │ ├── A_row_packed.mem # Input vector A
+    │ ├── x_vector.mem # Input vector x
+    │ └── expected_y.txt # Output dot product (float)
+    ├── ...
 
 
 Each directory corresponds to the data type selected.
