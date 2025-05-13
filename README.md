@@ -56,10 +56,10 @@ Each directory corresponds to the data type selected.
 
 Use $readmemh to load these files in your Verilog/SystemVerilog testbench:
 
-initial begin
-  $readmemh("A_row_packed.mem", a_mem);
-  $readmemh("x_vector.mem", x_mem);
-end
+    initial begin
+    $readmemh("A_row_packed.mem", a_mem);
+    $readmemh("x_vector.mem", x_mem);
+    end
 
 
 Compare y_out from simulation with the value in expected_y.txt.
