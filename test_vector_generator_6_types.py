@@ -2,6 +2,10 @@ import numpy as np
 import struct
 import os
 
+def float32_to_hex(val):
+    """Convert float32 value to IEEE-754 hex representation."""
+    return struct.unpack('>I', struct.pack('>f', val))[0]
+
 def generate_vectors(data_type_choice):
     VECTOR_LENGTH = 64
     FLOAT_TYPE = np.float32
@@ -28,40 +32,43 @@ def generate_vectors(data_type_choice):
     out_dir = os.path.join(base_dir, type_name)
     os.makedirs(out_dir, exist_ok=True)
 
-    # Generate input A vector
-    if "int" in type_name or "uint" in type_name:
-        A = np.random.randint(dtype_info["min"], dtype_info["max"], size=64, dtype=dtype_info["dtype"])
-    else:
-        A = np.random.uniform(dtype_info["min"], dtype_info["max"], size=64).astype(dtype_info["dtype"])
+    print(f"{'Test':>4} | {'Dot Product':>12} | {'FP32 Hex':>10}")
+    print("-" * 34)
 
-    # Generate x_vector as float32 values
-    x_vector = np.random.uniform(-10.0, 10.0, size=64).astype(FLOAT_TYPE)
+    # Generate multiple test cases
+    for test_num in range(64):
+        if "int" in type_name or "uint" in type_name:
+            A = np.arange(test_num, test_num + VECTOR_LENGTH, dtype=dtype_info["dtype"])
+        else:
+            A = np.random.uniform(dtype_info["min"], dtype_info["max"], size=VECTOR_LENGTH).astype(dtype_info["dtype"])
 
-    # Compute dot product
-    dot_product = np.dot(A.astype(FLOAT_TYPE), x_vector)
+        x_vector = np.ones(VECTOR_LENGTH, dtype=FLOAT_TYPE)
+        dot_product = np.dot(A.astype(FLOAT_TYPE), x_vector)
+        hex_val = float32_to_hex(dot_product)
 
-    # Save A to .mem file
-    with open(os.path.join(out_dir, "A_row_packed.mem"), "w") as f:
-        for val in A:
-            if "int" in type_name or "uint" in type_name:
-                f.write(f"{val & 0xFF:02X}\n")
-            else:
-                ieee_hex = struct.unpack('>I', struct.pack('>f', float(val)))[0]
-                f.write(f"{ieee_hex:08X}\n")
+        test_dir = os.path.join(out_dir, f"test_{test_num}")
+        os.makedirs(test_dir, exist_ok=True)
 
-    # Save x_vector
-    with open(os.path.join(out_dir, "x_vector.mem"), "w") as f:
-        for val in x_vector:
-            ieee_hex = struct.unpack('>I', struct.pack('>f', val))[0]
-            f.write(f"{ieee_hex:08X}\n")
+        # Save A
+        with open(os.path.join(test_dir, "A_row_packed.mem"), "w") as f:
+            for val in A:
+                if "int" in type_name or "uint" in type_name:
+                    f.write(f"{val & 0xFF:02X}\n")
+                else:
+                    ieee_hex = float32_to_hex(float(val))
+                    f.write(f"{ieee_hex:08X}\n")
 
-    # Save expected result
-    with open(os.path.join(out_dir, "expected_y.txt"), "w") as f:
-        f.write(f"{dot_product:.6f}\n")
+        # Save x_vector
+        with open(os.path.join(test_dir, "x_vector.mem"), "w") as f:
+            for _ in range(VECTOR_LENGTH):
+                f.write("3F800000\n")  # IEEE-754 of 1.0
 
-    print(f"✅ {type_name} test vectors generated in: {out_dir}")
+        # Save expected result
+        with open(os.path.join(test_dir, "expected_y.txt"), "w") as f:
+            f.write(f"{dot_product:.6f}\n")
 
-# Main function with user input
+        print(f"{test_num:>4} | {dot_product:12.6f} | {hex_val:08X}")
+
 def main():
     print("Select data type to generate test vectors:")
     print("1. int2\n2. int4\n3. int8\n4. uint8\n5. fp16\n6. bf16")
@@ -71,5 +78,5 @@ def main():
     except Exception as e:
         print(f"❌ Error: {e}")
 
-# Run the main function
+# Run main
 main()
